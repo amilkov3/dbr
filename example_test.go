@@ -2,7 +2,9 @@ package dbr
 
 import (
 	"fmt"
+	"github.com/gocraft/dbr/v2/dialect"
 	"log"
+	"testing"
 	"time"
 )
 
@@ -133,14 +135,20 @@ func ExampleTx() {
 	tx.Commit()
 }
 
-func ExampleAnd() {
-	And(
-		Or(
-			Gt("created_at", "2015-09-10"),
-			Lte("created_at", "2015-09-11"),
-		),
+func TestBar(t *testing.T) {
+	b := NewBuffer()
+	if err := And(
 		Eq("title", "hello world"),
-	)
+		Or(
+			And(
+				Gt("created_at", "2015-09-10"),
+				Lte("created_at", "2015-09-11"),
+			),
+		),
+	).Build(dialect.MySQL, b); err != nil {
+		panic(err)
+	}
+	fmt.Println(b.String())
 }
 
 func ExampleI() {
@@ -148,11 +156,15 @@ func ExampleI() {
 	I("suggestions.id").As("id") // `suggestions`.`id`
 }
 
-func ExampleUnion() {
-	Union(
+func TestFoo(t *testing.T) {
+	b := NewBuffer()
+	if err := Union(
 		Select("*"),
 		Select("*"),
-	).As("subquery")
+	).Build(dialect.MySQL, b); err != nil {
+		panic(err)
+	}
+	fmt.Println(b.String())
 }
 
 func ExampleUnionAll() {
